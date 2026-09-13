@@ -94,10 +94,10 @@ def index():
         wildcard = f'%{search_query}%'
         params.extend([wildcard, wildcard, wildcard])
 
-    query += ' ORDER BY CASE status WHEN "Selesai" THEN 2 ELSE 1 END, deadline ASC, id DESC'
+    query += " ORDER BY CASE status WHEN 'Selesai' THEN 2 ELSE 1 END, deadline ASC, id DESC"
     tasks = conn.execute(query, params).fetchall()
 
-    courses = [row[0] for row in conn.execute('SELECT DISTINCT course FROM tasks WHERE course != "" ORDER BY course ASC').fetchall()]
+    courses = [row[0] for row in conn.execute("SELECT DISTINCT course FROM tasks WHERE course != '' ORDER BY course ASC").fetchall()]
     
     # 4. Ambil Seluruh Data Tugas untuk Kalender Interaktif
     all_tasks_raw = conn.execute('SELECT id, title, course, description, deadline, priority, status FROM tasks ORDER BY deadline ASC').fetchall()
