@@ -36,7 +36,7 @@ def deadline_badge_filter(deadline_str):
 
 def get_task(task_id):
     conn = get_db_connection()
-    task = conn.execute('SELECT * FROM tasks WHERE id = ?', (task_id,)).fetchone()
+    task = conn.execute('SELECT * FROM tasks WHERE id = %s', (task_id,)).fetchone()
     conn.close()
     if task is None:
         abort(404)
@@ -82,15 +82,15 @@ def index():
     params = []
 
     if status_filter and status_filter != 'Semua':
-        query += ' AND status = ?'
+        query += ' AND status = %s'
         params.append(status_filter)
 
     if priority_filter and priority_filter != 'Semua':
-        query += ' AND priority = ?'
+        query += ' AND priority = %s'
         params.append(priority_filter)
 
     if search_query:
-        query += ' AND (title LIKE ? OR course LIKE ? OR description LIKE ?)'
+        query += ' AND (title ILIKE %s OR course ILIKE %s OR description ILIKE %s)'
         wildcard = f'%{search_query}%'
         params.extend([wildcard, wildcard, wildcard])
 
@@ -152,7 +152,7 @@ def add_task():
     conn = get_db_connection()
     conn.execute('''
         INSERT INTO tasks (title, course, description, deadline, priority, status)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     ''', (title, course, description, deadline, priority, status))
     conn.commit()
     conn.close()
@@ -179,8 +179,8 @@ def edit_task(id):
         conn = get_db_connection()
         conn.execute('''
             UPDATE tasks 
-            SET title = ?, course = ?, description = ?, deadline = ?, priority = ?, status = ?
-            WHERE id = ?
+            SET title = %s, course = %s, description = %s, deadline = %s, priority = %s, status = %s
+            WHERE id = %s
         ''', (title, course, description, deadline, priority, status, id))
         conn.commit()
         conn.close()
@@ -197,7 +197,7 @@ def update_status(id):
 
     if new_status in valid_statuses:
         conn = get_db_connection()
-        conn.execute('UPDATE tasks SET status = ? WHERE id = ?', (new_status, id))
+        conn.execute('UPDATE tasks SET status = %s WHERE id = %s', (new_status, id))
         conn.commit()
         conn.close()
         flash(f'Status tugas diubah menjadi "{new_status}"', 'success')
@@ -210,7 +210,7 @@ def update_status(id):
 def delete_task(id):
     task = get_task(id)
     conn = get_db_connection()
-    conn.execute('DELETE FROM tasks WHERE id = ?', (id,))
+    conn.execute('DELETE FROM tasks WHERE id = %s', (id,))
     conn.commit()
     conn.close()
 
@@ -231,7 +231,7 @@ def login():
             return redirect(url_for('index', open_auth='login'))
 
         conn = get_db_connection()
-        user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        user = conn.execute('SELECT * FROM users WHERE email = %s', (email,)).fetchone()
         conn.close()
 
         if user and check_password_hash(user['password_hash'], password):
@@ -272,7 +272,7 @@ def register():
             return redirect(url_for('index', open_auth='register'))
 
         conn = get_db_connection()
-        existing_user = conn.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
+        existing_user = conn.execute('SELECT id FROM users WHERE email = %s', (email,)).fetchone()
         if existing_user:
             conn.close()
             flash('Email sudah terdaftar. Silakan langsung masuk!', 'danger')
@@ -282,9 +282,10 @@ def register():
         cur = conn.cursor()
         cur.execute('''
             INSERT INTO users (name, email, password_hash, auth_provider)
-            VALUES (?, ?, ?, 'local')
+            VALUES (%s, %s, %s, 'local')
+            RETURNING id
         ''', (name, email, hashed))
-        user_id = cur.lastrowid
+        user_id = cur.fetchone()['id']
         conn.commit()
         conn.close()
 
@@ -307,15 +308,16 @@ def google_auth():
     email = request.form.get('email') or request.args.get('email') or 'fadlan@student.ac.id'
 
     conn = get_db_connection()
-    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    user = conn.execute('SELECT * FROM users WHERE email = %s', (email,)).fetchone()
     if not user:
         dummy_hash = generate_password_hash('google_student_verified_auth')
         cur = conn.cursor()
         cur.execute('''
             INSERT INTO users (name, email, password_hash, auth_provider)
-            VALUES (?, ?, ?, 'google')
+            VALUES (%s, %s, %s, 'google')
+            RETURNING id
         ''', (name, email, dummy_hash))
-        user_id = cur.lastrowid
+        user_id = cur.fetchone()['id']
         conn.commit()
     else:
         user_id = user['id']

@@ -1,0 +1,29 @@
+# Python & Virtual Environment
+venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# SQLite Database (Legacy / Local)
+taskmate.db
+*.db
+*.sqlite3
+
+# Vercel Deployment & Build Artifacts
+.vercel/
+.vercel
+
+# IDE & OS Artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
