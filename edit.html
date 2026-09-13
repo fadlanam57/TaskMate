@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Tugas - TaskMate{% endblock %}
+
+{% block content %}
+<div class="edit-page-container">
+    <div class="edit-sheet-card">
+        <div class="edit-sheet-header">
+            <a href="{{ url_for('index') }}" class="btn-back-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span>Kembali ke Workspace</span>
+            </a>
+            <div class="edit-title-row">
+                <h1 class="edit-title-text">Edit Detail Tugas</h1>
+                <span class="edit-id-tag">ID: #{{ task.id }}</span>
+            </div>
+        </div>
+
+        <form action="{{ url_for('edit_task', id=task.id) }}" method="POST" class="edit-sheet-form">
+            <div class="form-group-item">
+                <label for="title" class="form-label-text">Judul Tugas <span class="required-star">*</span></label>
+                <input type="text" id="title" name="title" value="{{ task.title }}" required class="form-control-input">
+            </div>
+
+            <div class="form-row-2col">
+                <div class="form-group-item flex-1">
+                    <label for="course" class="form-label-text">Mata Kuliah <span class="required-star">*</span></label>
+                    <input type="text" id="course" name="course" value="{{ task.course }}" required class="form-control-input">
+                </div>
+
+                <div class="form-group-item flex-1">
+                    <label for="deadline" class="form-label-text">Batas Waktu (Deadline) <span class="required-star">*</span></label>
+                    <input type="date" id="deadline" name="deadline" value="{{ task.deadline }}" required class="form-control-input">
+                </div>
+            </div>
+
+            <div class="form-row-2col">
+                <div class="form-group-item flex-1">
+                    <label for="priority" class="form-label-text">Skala Prioritas <span class="required-star">*</span></label>
+                    <select id="priority" name="priority" class="form-control-select">
+                        <option value="Tinggi" {% if task.priority == 'Tinggi' %}selected{% endif %}>Tinggi 🔥 (Mendesak / Bobot Besar)</option>
+                        <option value="Sedang" {% if task.priority == 'Sedang' %}selected{% endif %}>Sedang ⚡ (Standar)</option>
+                        <option value="Rendah" {% if task.priority == 'Rendah' %}selected{% endif %}>Rendah 💤 (Tugas Ringan)</option>
+                    </select>
+                </div>
+
+                <div class="form-group-item flex-1">
+                    <label for="status" class="form-label-text">Status Tugas <span class="required-star">*</span></label>
+                    <select id="status" name="status" class="form-control-select">
+                        <option value="Belum Dikerjakan" {% if task.status == 'Belum Dikerjakan' %}selected{% endif %}>Belum Dikerjakan</option>
+                        <option value="Sedang Dikerjakan" {% if task.status == 'Sedang Dikerjakan' %}selected{% endif %}>Sedang Dikerjakan</option>
+                        <option value="Selesai" {% if task.status == 'Selesai' %}selected{% endif %}>Selesai ✅</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group-item">
+                <label for="description" class="form-label-text">Catatan Tambahan</label>
+                <textarea id="description" name="description" rows="4" class="form-control-textarea">{{ task.description }}</textarea>
+            </div>
+
+            <div class="edit-sheet-footer">
+                <a href="{{ url_for('index') }}" class="btn-action-cancel">Batal</a>
+                <button type="submit" class="btn-action-submit">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
